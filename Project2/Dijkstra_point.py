@@ -34,6 +34,7 @@ def CreateMap():
     map_values = list(np.ones(300 * 200, dtype=int))
     map_space = dict(zip(map_keys, map_values))
 
+    # Need to fill in the shapes with black pixels
     obstacles = []
     poly1 = []
     poly1_coords = [(25, 185), (75, 185), (100, 150), (75, 120), (50, 150),
