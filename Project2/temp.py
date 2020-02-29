@@ -18,10 +18,11 @@ def GetLine(point1, point2):
             y = point1[1] + 1
         if (point2[1] < point1[1]):
             y = point1[1] - 1
+
         line.append((x, y))
+    return line
 
 
-return line
 # Given a predefined map, convert to binary map to determine obstacle space (point robot radius = 0, obstacle clearance = 0)
 
 
@@ -35,13 +36,15 @@ def CreateMap():
     map_values = list(np.ones(300 * 200, dtype=int))
     map_space = dict(zip(map_keys, map_values))
 
+    # Need to fill in the shapes with black pixels
     obstacles = []
-    poly = []
-    poly_coords = [(25, 185), (75, 185), (100, 150), (75, 120), (50, 150),
-                   (20, 120)]
-    for n in range(0, len(poly_coords), 2):
-        poly.append(GetLine(poly_coords[n], poly_coords[n + 1]))
-    obstacles.append(poly)
+    poly1 = []
+    poly1_coords = [(25, 185), (75, 185), (100, 150), (75, 120), (50, 150),
+                    (20, 120)]
+    for n in range(0, len(poly1_coords), 2):
+        print(n)
+        poly1.append(GetLine(poly1_coords[n], poly1_coords[n + 1]))
+    obstacles.append(poly1)
 
     rect = []
     rect_coords = [(30, 131), (39, 136), (104, 164), (95, 169)]
@@ -62,7 +65,15 @@ def CreateMap():
     circle_start = (149, 99)
     r = 25
     for x in range(0, 25 * 2):
-        circle.append(x, 50 + m.sqrt(r**2 - (x - 224)**2))
+        circle.append(x, 50 + abs(m.sqrt(r**2 - (x - 224)**2)))
+        circle.append(x, 50 + -abs(m.sqrt(r**2 - (x - 224)**2)))
+    obstacles.append(circle)
+
+    poly2 = []
+    poly2_coords = [(199, 174), (224, 159), (249, 174), (224, 189)]
+    for n in range(0, len(poly2_coords), 2):
+        poly2.append(GetLine(poly2_coords[n], poly2_coords[n + 1]))
+    obstacles.append(poly2)
 
     for obstacle in obstacles:
         for point in obstacle:

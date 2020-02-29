@@ -6,75 +6,27 @@ import math as m
 import heapq as hpq
 
 
-def GetLine(point1, point2):
-    line = []
-    x = point1[0]
-    y = point1[1]
-    while (x != point2[0] and y != point2[1]):
-        if (point2[0] > point1[0]):
-            x = point1[0] + 1
-        if (point2[0] < point1[0]):
-            x = point1[0] - 1
-        if (point2[1] > point1[1]):
-            y = point1[1] + 1
-        if (point2[1] < point1[1]):
-            y = point1[1] - 1
-        line.append((x, y))
-    return line
-
-
 # Given a predefined map, convert to binary map to determine obstacle space (point robot radius = 0, obstacle clearance = 0)
 def CreateMap():
     # Create map dictionary which holds coordinates as a tuple of ints and the pixel value of that coordinate location as an int
     map_keys = []
-    for i in range(0, 200):
-        for j in range(0, 300):
-            map_keys.append((i, j))
 
-    map_values = list(np.ones(300 * 200, dtype=int))
-    map_space = dict(zip(map_keys, map_values))
+    map_screen = pyg.Surface((300, 200))
+    map_screen.fill((255, 255, 255))
+    pyg.draw.circle(map_screen, (0, 0, 0), (224, 50), 25)
+    pyg.draw.polygon(map_screen, (0, 0, 0), [(30, 131), (39, 126), (104, 164),
+                                             (95, 169)])
+    pyg.draw.polygon(map_screen, (0, 0, 0), [(25, 14), (75, 14), (100, 49),
+                                             (75, 79), (50, 49), (20, 79)])
+    pyg.draw.ellipse(map_screen, (0, 0, 0), [109, 79, 80, 40])
+    pyg.draw.polygon(map_screen, (0, 0, 0), [(199, 174), (224, 159),
+                                             (249, 174), (224, 189)])
+    map_array = pyg.surfarray.pixels3d(map_screen)
+    map_space = {}
+    for i in range(0, len(map_array[0])):
+        for j in range(0, len(map_array)):
+            map_space[(j, i)] = map_array[j, i, 0]
 
-    # Need to fill in the shapes with black pixels
-    obstacles = []
-    poly1 = []
-    poly1_coords = [(25, 185), (75, 185), (100, 150), (75, 120), (50, 150),
-                    (20, 120)]
-    for n in range(0, len(poly1_coords), 2):
-        poly1.append(GetLine(poly1_coords[n], poly1_coords[n + 1]))
-    obstacles.append(poly1)
-
-    rect = []
-    rect_coords = [(30, 131), (39, 136), (104, 164), (95, 169)]
-    for n in range(0, len(rect_coords), 2):
-        rect.append(GetLine(rect_coords[n], rect_coords[n + 1]))
-    obstacles.append(rect)
-
-    oval = []
-    oval_start = (109, 99)
-    a = 40
-    b = 20
-    for x in range(0, (a * 2) - 1):
-        oval.append((x, abs(b * m.sqrt(1 - (((x - 149)**2) / a**2)) + 99)))
-        oval.append((x, -abs(b * m.sqrt(1 - (((x - 149)**2) / a**2)) + 99)))
-    obstacles.append(oval)
-
-    circle = []
-    circle_start = (149, 99)
-    r = 25
-    for x in range(0, 25 * 2):
-        circle.append(x, 50 + abs(m.sqrt(r**2 - (x - 224)**2)))
-        circle.append(x, 50 + -abs(m.sqrt(r**2 - (x - 224)**2)))
-    obstacles.append(circle)
-
-    poly2 = []
-    poly2_coords = []
-    for n in range(0, len(poly2_coords), 2):
-        poly1.append(GetLine(poly2_coords[n], poly2_coords[n + 1]))
-    obstacles.append(poly2)
-
-    for obstacle in obstacles:
-        for point in obstacle:
-            map_space[point] = 0
     return map_space
 
 
@@ -106,18 +58,16 @@ def GetInput(map_space):
                     goal_string = goal_string + ', ' + element
         start = tuple(map(int, start_string.split(', ')))
         goal = tuple(map(int, goal_string.split(', ')))
-        if (0 < (start[0] and goal[0]) < 300):
-            if (0 < (start[1] and goal[1]) < 200):
-                if (map_space[start] == 1):
-                    if (map_space[goal] == 1):
+        if ((0 < start[0] < 300) and (0 < goal[0] < 300)):
+            if ((0 < start[1] < 200) and (0 < goal[1] < 200)):
+                if (map_space[start] == 255):
+                    if (map_space[goal] == 255):
                         input_bad = False
     return start, goal
 
 
 # Implement Djikstra's Algorithm
 # Implementing Backtracking (once goal node is achieved)
-def Solve(start, goal):
-    pass
 
 
 class PointNode:
@@ -238,8 +188,8 @@ def main():
     #goal_Node = (20,20)
     map_space = CreateMap()
     start, goal = GetInput(map_space)
-    #path = Solve(start, goal)
     #path = applyingDijkstraAlgorithm(start_Node,goal_Node)
+    path = 1
     Visualize(path, map_space)
 
 
