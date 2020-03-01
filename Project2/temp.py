@@ -130,7 +130,7 @@ def Solve(start, goal):
 # Using pygame implement animation of map exploration and display optimal path
 
 
-def Visualize(path, map_space):
+def Visualize(path, visited, map_space):
     pyg.display.init()
     map_screen = pyg.display.set_mode((300, 200))
 
@@ -142,6 +142,8 @@ def Visualize(path, map_space):
                 map_screen.set_at(key, (0, 0, 0))
             else:
                 map_screen.set_at(key, (255, 255, 255))
+            if key in visited:
+                map_screen.set_at(key, (0, 0, 255))
         for event in pyg.event.get():
             if (event.type == QUIT):
                 pyg.quit()
@@ -157,7 +159,9 @@ def main():
     start, goal = GetInput(map_space)
     #path = Solve(start, goal)
     path = 1
-    Visualize(path, map_space)
+    for i in range(0, 100):
+        visited.append((i, i))
+    Visualize(path, visited, map_space)
 
 
 main()

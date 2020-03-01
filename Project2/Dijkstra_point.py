@@ -114,7 +114,6 @@ def priorityQueueTest():
     newNode3 = [12, 3]
     addNewNode(ListOfNodes, 5, newNode3)
     print("List after adding newNode3 = ", ListOfNodes.Node_State_i)
-
     getNode(ListOfNodes)
     print(ListOfNodes.Node_State_i)
     getNode(ListOfNodes)
@@ -158,10 +157,9 @@ def applyingDijkstraAlgorithm(start_node, goal_node):
 # Using pygame implement animation of map exploration and display optimal path
 
 
-def Visualize(path, map_space):
+def Visualize(path, visited, map_space):
     pyg.display.init()
     map_screen = pyg.display.set_mode((300, 200))
-
     while (True):
         map_screen.fill((255, 255, 255))
         pyg.display.set_caption("Map")
@@ -170,6 +168,8 @@ def Visualize(path, map_space):
                 map_screen.set_at(key, (0, 0, 0))
             else:
                 map_screen.set_at(key, (255, 255, 255))
+            for node in visited:
+                map_screen.set_at(key, (0, 0, 255))
         for event in pyg.event.get():
             if (event.type == QUIT):
                 pyg.quit()
@@ -190,7 +190,10 @@ def main():
     start, goal = GetInput(map_space)
     #path = applyingDijkstraAlgorithm(start_Node,goal_Node)
     path = 1
-    Visualize(path, map_space)
+    visited = []
+    for i in range(0, 100):
+        visited.append((i, i))
+    Visualize(path, visited, map_space)
 
 
 main()
