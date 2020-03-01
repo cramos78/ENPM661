@@ -37,24 +37,21 @@ def CreateMap():
 def GetInput(map_space):
     input_bad = True
     while (input_bad):
-        start_input = input(
-            "Enter the starting point of the robot within the boundaries of the map (300 by 200) in the form, x, y: "
-        )
-        goal_input = input(
-            "Enter the goal point of the robot within the boundaries of the map (300 by 200) in the form, x, y: "
-        )
-        start_string = re.findall(r"[0-2]?[0-9]?[0-9], [0-1]?[0-9]?[0-9]",
-                                  start_input)
-        goal_string = re.findall(r"[0-2]?[0-9]?[0-9], [0-1]?[0-9]?[0-9]",
-                                 goal_input)
+        start_string = []
+        goal_string = []
         while ((start_string == []) or (goal_string == [])
                or (len(start_string) > 1) or (len(goal_string) > 1)):
             start_input = input(
-                "Enter the starting point of the robot within the boundaries of the map (300 by 200) in the form, (x, y): "
+                "Enter the starting point of the robot within the boundaries of the map (300 by 200) in the form, x, y: "
             )
             goal_input = input(
-                "Enter the goal point of the robot within the boundaries of the map (300 by 200) in the form, (x, y): "
+                "Enter the goal point of the robot within the boundaries of the map (300 by 200) in the form, x, y: "
             )
+            start_string = re.findall(r"[0-2]?[0-9]?[0-9], [0-1]?[0-9]?[0-9]",
+                                      start_input)
+            goal_string = re.findall(r"[0-2]?[0-9]?[0-9], [0-1]?[0-9]?[0-9]",
+                                     goal_input)
+
         start = tuple(map(int, start_string[0].split(', ')))
         goal = tuple(map(int, goal_string[0].split(', ')))
         if ((0 < start[0] < 300) and (0 < goal[0] < 300)):
@@ -156,8 +153,9 @@ def applyingDijkstraAlgorithm(start_node, goal_node):
                 exploredNodesPath[newNode] = currentNode
     return exploredNodesPath
 
+
 #Implementing backtracking algorithm between start node and goal node and storing results on list pathlist[]
-def backtrackingStartGoalPath(start,goal,explored_path):
+def backtrackingStartGoalPath(start, goal, explored_path):
     pathlist = []
     goalpath = goal
     pathlist.append(goal)
@@ -167,28 +165,37 @@ def backtrackingStartGoalPath(start,goal,explored_path):
     pathlist.reverse()
     return pathlist
 
+
 # Using pygame implement animation of map exploration and display optimal path
 
 
+# accepts optimal path list, visited node list, and map_space as parameters
 def Visualize(path, visited, map_space):
     pyg.display.init()
     map_screen = pyg.display.set_mode((300, 200))
     while (True):
-        map_screen.fill((255, 255, 255))
-        pyg.display.set_caption("Map")
-        for key in map_space.keys():
-            if map_space[key] == 0:
-                map_screen.set_at(key, (0, 0, 0))
-            else:
-                map_screen.set_at(key, (255, 255, 255))
+        for event in pyg.event.get():
+            (b1, b2, b3) = pyg.mouse.get_pressed()
+        if b1 or b2 or b3:
+
+            map_screen.fill((255, 255, 255))
+            pyg.display.set_caption("Map")
+            for key in map_space.keys():
+                if map_space[key] == 0:
+                    map_screen.set_at(key, (0, 0, 0))
+                else:
+                    map_screen.set_at(key, (255, 255, 255))
             for node in visited:
                 map_screen.set_at(node, (0, 0, 255))
-        for event in pyg.event.get():
-            if (event.type == QUIT):
-                pyg.quit()
-                sys.exit()
-            pyg.display.update()
-    pass
+                for event in pyg.event.get():
+                    if (event.type == QUIT):
+                        pyg.quit()
+                        sys.exit()
+                pyg.time.delay(250)
+                pyg.display.update()
+            for node in path:
+                map_screen.set_at(node, (0, 255, 0))
+                pyg.display.update()
 
 
 #main function which calls all subfunctions necessary to solve the maze with Dijkstra's algorithm
@@ -202,7 +209,9 @@ def main():
     map_space = CreateMap()
     start, goal = GetInput(map_space)
     #path = applyingDijkstraAlgorithm(start_Node,goal_Node)
-    path = 1
+    path = []
+    for i in range(199, 100, -1):
+        path.append((i, i))
     visited = []
     for i in range(0, 100):
         visited.append((i, i))
