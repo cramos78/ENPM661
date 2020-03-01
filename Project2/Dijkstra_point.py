@@ -153,6 +153,16 @@ def applyingDijkstraAlgorithm(start_node, goal_node):
                 exploredNodesPath[newNode] = currentNode
     return exploredNodesPath
 
+#Implementing backtracking algorithm between start node and goal node and storing results on list pathlist[]
+def backtrackingStartGoalPath(start,goal,explored_path):
+    pathlist = []
+    goalpath = goal
+    pathlist.append(goal)
+    while goalpath != start:
+        pathlist.append(explored_path[goalpath])
+        goalpath = explored_path[goalpath]
+    pathlist.reverse()
+    return pathlist
 
 # Using pygame implement animation of map exploration and display optimal path
 
