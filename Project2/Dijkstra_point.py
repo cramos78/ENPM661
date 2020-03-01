@@ -19,30 +19,6 @@ def SolveLine(point1, point2, point3):
 
 # Given a predefined map, convert to binary map to determine obstacle space (point robot radius = 0, obstacle clearance = 0)
 def CreateMap():
-    # Create map dictionary which holds coordinates as a tuple of ints and the pixel value of that coordinate location as an int
-    map_keys = []
-
-    map_screen = pyg.Surface((300, 200))
-    map_screen.fill((255, 255, 255))
-    pyg.draw.circle(map_screen, (0, 0, 0), (224, 50), 25)
-    pyg.draw.polygon(map_screen, (0, 0, 0), [(30, 131), (39, 126), (104, 164),
-                                             (95, 169)])
-    pyg.draw.polygon(map_screen, (0, 0, 0), [(25, 14), (75, 14), (100, 49),
-                                             (75, 79), (50, 49), (20, 79)])
-    pyg.draw.ellipse(map_screen, (0, 0, 0), [109, 79, 80, 40])
-    pyg.draw.polygon(map_screen, (0, 0, 0), [(199, 174), (224, 159),
-                                             (249, 174), (224, 189)])
-    map_array = pyg.surfarray.pixels3d(map_screen)
-    map_space = {}
-    for i in range(0, len(map_array[0])):
-        for j in range(0, len(map_array)):
-            map_space[(j, i)] = map_array[j, i, 0]
-
-    return map_space
-
-
-# Given a predefined map, convert to binary map to determine obstacle space (point robot radius = 0, obstacle clearance = 0)
-def CreateMap():
     # # Create map dictionary which holds coordinates as a tuple of ints and the pixel value of that coordinate location as an int
     # map_keys = []
     # for i in range(0, 200):
