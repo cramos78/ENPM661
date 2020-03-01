@@ -4,6 +4,7 @@ import numpy as np
 from pygame.locals import *
 import math as m
 import heapq as hpq
+import re
 
 
 # Given a predefined map, convert to binary map to determine obstacle space (point robot radius = 0, obstacle clearance = 0)
@@ -42,22 +43,20 @@ def GetInput(map_space):
         goal_input = input(
             "Enter the goal point of the robot within the boundaries of the map (300 by 200) in the form, x, y: "
         )
-        start_string = ''
-        goal_string = ''
-        for element in start_input:
-            if element.isnumeric():
-                if start_string == '':
-                    start_string = element
-                else:
-                    start_string = start_string + ', ' + element
-        for element in goal_input:
-            if element.isnumeric():
-                if goal_string == '':
-                    goal_string = element
-                else:
-                    goal_string = goal_string + ', ' + element
-        start = tuple(map(int, start_string.split(', ')))
-        goal = tuple(map(int, goal_string.split(', ')))
+        start_string = re.findall(r"[0-2]?[0-9]?[0-9], [0-1]?[0-9]?[0-9]",
+                                  start_input)
+        goal_string = re.findall(r"[0-2]?[0-9]?[0-9], [0-1]?[0-9]?[0-9]",
+                                 goal_input)
+        while ((start_string == []) or (goal_string == [])
+               or (len(start_string) > 1) or (len(goal_string) > 1)):
+            start_input = input(
+                "Enter the starting point of the robot within the boundaries of the map (300 by 200) in the form, (x, y): "
+            )
+            goal_input = input(
+                "Enter the goal point of the robot within the boundaries of the map (300 by 200) in the form, (x, y): "
+            )
+        start = tuple(map(int, start_string[0].split(', ')))
+        goal = tuple(map(int, goal_string[0].split(', ')))
         if ((0 < start[0] < 300) and (0 < goal[0] < 300)):
             if ((0 < start[1] < 200) and (0 < goal[1] < 200)):
                 if (map_space[start] == 255):
@@ -125,31 +124,35 @@ def priorityQueueTest():
 
 # Implementing Djikstra's Algorithm
 def applyingDijkstraAlgorithm(start_node, goal_node):
-    exploredNodesPath = {}                 # Contains list of explored nodes
-    exploredNodesCost = {}                 # Contains list of explored nodes cost
+    exploredNodesPath = {}  # Contains list of explored nodes
+    exploredNodesCost = {}  # Contains list of explored nodes cost
     exploredNodesPath[start_node] = 0
     exploredNodesCost[start_node] = 0
     ListOfNodes = PointNode()
-    addNewNode(ListOfNodes,0,start_node)
-    print("Explored Node Cost ",exploredNodesCost)
-    print("List of Nodes ",ListOfNodes.Node_State_i)
+    addNewNode(ListOfNodes, 0, start_node)
+    print("Explored Node Cost ", exploredNodesCost)
+    print("List of Nodes ", ListOfNodes.Node_State_i)
     while len(ListOfNodes.Node_State_i) > 0:
-        currentNode, currentNodeCost= getNode(ListOfNodes)
-        print("Current Node ",currentNode)
+        currentNode, currentNodeCost = getNode(ListOfNodes)
+        print("Current Node ", currentNode)
         print("Current Node Cost = ", currentNodeCost)
         if currentNode == goal_node:
             break
         for newNodeMove in ListOfNeighborsMoves:
-            newNode = (currentNode[0] + newNodeMove[0],currentNode[1] + newNodeMove[1])
-            if newNode[0] < 0 or newNode[1] < 0 :     # Need to add condition for x move greater than 300 and y move greater than 200
-                print("New node has negative coordinates, skipping it..",newNode)
+            newNode = (currentNode[0] + newNodeMove[0],
+                       currentNode[1] + newNodeMove[1])
+            if newNode[0] < 0 or newNode[
+                    1] < 0:  # Need to add condition for x move greater than 300 and y move greater than 200
+                print("New node has negative coordinates, skipping it..",
+                      newNode)
                 continue
-            print("New Node = ",newNode)
-            newNodeCost = round(getCost(currentNodeCost,newNodeMove),3)
+            print("New Node = ", newNode)
+            newNodeCost = round(getCost(currentNodeCost, newNodeMove), 3)
             print("New Node cost = ", newNodeCost)
-            if newNode not in exploredNodesCost or newNodeCost < exploredNodesCost[newNode]:
+            if newNode not in exploredNodesCost or newNodeCost < exploredNodesCost[
+                    newNode]:
                 exploredNodesCost[newNode] = newNodeCost
-                addNewNode(ListOfNodes,newNodeCost,newNode)
+                addNewNode(ListOfNodes, newNodeCost, newNode)
                 exploredNodesPath[newNode] = currentNode
     return exploredNodesPath
 
@@ -169,7 +172,7 @@ def Visualize(path, visited, map_space):
             else:
                 map_screen.set_at(key, (255, 255, 255))
             for node in visited:
-                map_screen.set_at(key, (0, 0, 255))
+                map_screen.set_at(node, (0, 0, 255))
         for event in pyg.event.get():
             if (event.type == QUIT):
                 pyg.quit()
