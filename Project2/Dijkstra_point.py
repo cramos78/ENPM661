@@ -125,32 +125,32 @@ def priorityQueueTest():
 
 # Implementing Djikstra's Algorithm
 def applyingDijkstraAlgorithm(start_node, goal_node):
-    exploredNodesPath = {}
-    exploredNodesCost = {}
-    exploredNodesPath[start_Node] = 0
-    exploredNodesCost[start_Node] = 0
+    exploredNodesPath = {}                 # Contains list of explored nodes
+    exploredNodesCost = {}                 # Contains list of explored nodes cost
+    exploredNodesPath[start_node] = 0
+    exploredNodesCost[start_node] = 0
     ListOfNodes = PointNode()
-    addNewNode(ListOfNodes, 0, start_Node)
-    print("Explored Node Cost ", exploredNodesCost)
-    print("List of Nodes ", ListOfNodes.Node_State_i)
+    addNewNode(ListOfNodes,0,start_node)
+    print("Explored Node Cost ",exploredNodesCost)
+    print("List of Nodes ",ListOfNodes.Node_State_i)
     while len(ListOfNodes.Node_State_i) > 0:
-        currentNode, currentNodeCost = getNode(ListOfNodes)
-        print("Current Node ", currentNode)
+        currentNode, currentNodeCost= getNode(ListOfNodes)
+        print("Current Node ",currentNode)
         print("Current Node Cost = ", currentNodeCost)
         if currentNode == goal_node:
             break
         for newNodeMove in ListOfNeighborsMoves:
-            newNode = (currentNode[0] + newNodeMove[0],
-                       currentNode[1] + newNodeMove[1])
-            print("New Node = ", newNode)
-            newNodeCost = currentNodeCost + getCost(currentNodeCost,
-                                                    newNodeMove)
-            print("New Cost =", newNodeCost)
-            if newNode not in exploredNodesCost or newNodeCost < exploredNodesCost[
-                    newNode]:
+            newNode = (currentNode[0] + newNodeMove[0],currentNode[1] + newNodeMove[1])
+            if newNode[0] < 0 or newNode[1] < 0 :     # Need to add condition for x move greater than 300 and y move greater than 200
+                print("New node has negative coordinates, skipping it..",newNode)
+                continue
+            print("New Node = ",newNode)
+            newNodeCost = round(getCost(currentNodeCost,newNodeMove),3)
+            print("New Node cost = ", newNodeCost)
+            if newNode not in exploredNodesCost or newNodeCost < exploredNodesCost[newNode]:
                 exploredNodesCost[newNode] = newNodeCost
-                addNewNode(ListOfNodes, newNodeCost, newNode)
-                exploredNodesPath[newNode] = newNodeCost
+                addNewNode(ListOfNodes,newNodeCost,newNode)
+                exploredNodesPath[newNode] = currentNode
     return exploredNodesPath
 
 
