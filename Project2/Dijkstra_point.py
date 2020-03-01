@@ -7,7 +7,14 @@ import heapq as hpq
 import re
 
 
-
+def SolveLine(point1, point2, point3):
+    lhs = np.array([point1[0], point1[1], 1], [point2[0], point2[1], 1], [point3[0], point3[1], 1]) 
+    rhs = np.array([0], [0], [0])
+    solution = np.linalg.solve(lhs, rhs)
+    a = solution[0]
+    b = solution[1]
+    c = solution[2]
+    
 
 # Given a predefined map, convert to binary map to determine obstacle space (point robot radius = 0, obstacle clearance = 0)
 def CreateMap():
@@ -31,10 +38,10 @@ def CreateMap():
     obstacles.append(poly1)
 
     rect = np.zeros(300 * 200, dtype=int)
-    rect_coords = [(39, 126), (30, 131), (95, 169), (104, 164)]
+    rect_coords = [(39, 126), (34.5, 128.5) (30, 131), (95, 169), (104, 164)]
     for n in range(0, len(rect_coords), 2):
         # rect.append(GetLine(rect_coords[n], rect_coords[n + 1]))
-        rect = rect and GetLine(rect_coords[n], rect_coords[n+1])
+        rect = rect and SolveLine(rect_coords[n], rect_coords[n+1])
     
     obstacles = obstacles rect
 
