@@ -8,84 +8,109 @@ import re
 
 
 def SolveLine(point1, point2, point3):
-    lhs = np.array([point1[0], point1[1], 1], [point2[0], point2[1], 1], [point3[0], point3[1], 1]) 
+    lhs = np.array([point1[0], point1[1], 1], [point2[0], point2[1], 1],
+                   [point3[0], point3[1], 1])
     rhs = np.array([0], [0], [0])
     solution = np.linalg.solve(lhs, rhs)
     a = solution[0]
     b = solution[1]
     c = solution[2]
-    
+
 
 # Given a predefined map, convert to binary map to determine obstacle space (point robot radius = 0, obstacle clearance = 0)
 def CreateMap():
     # Create map dictionary which holds coordinates as a tuple of ints and the pixel value of that coordinate location as an int
     map_keys = []
-    for i in range(0, 200):
-        for j in range(0, 300):
-            map_keys.append((i, j))
 
-    map_values = list(np.ones(300 * 200, dtype=int))
-    map_space = dict(zip(map_keys, map_values))
+    map_screen = pyg.Surface((300, 200))
+    map_screen.fill((255, 255, 255))
+    pyg.draw.circle(map_screen, (0, 0, 0), (224, 50), 25)
+    pyg.draw.polygon(map_screen, (0, 0, 0), [(30, 131), (39, 126), (104, 164),
+                                             (95, 169)])
+    pyg.draw.polygon(map_screen, (0, 0, 0), [(25, 14), (75, 14), (100, 49),
+                                             (75, 79), (50, 49), (20, 79)])
+    pyg.draw.ellipse(map_screen, (0, 0, 0), [109, 79, 80, 40])
+    pyg.draw.polygon(map_screen, (0, 0, 0), [(199, 174), (224, 159),
+                                             (249, 174), (224, 189)])
+    map_array = pyg.surfarray.pixels3d(map_screen)
+    map_space = {}
+    for i in range(0, len(map_array[0])):
+        for j in range(0, len(map_array)):
+            map_space[(j, i)] = map_array[j, i, 0]
 
-    # Need to fill in the shapes with black pixels
-    # need to use half plane primitives and semi-algebrraic methods to define obstacles
-    obstacles = []
-    poly1 = np.zeros(300 * 200, dtype=int)
-    poly1_coords = [(25, 185), (75, 185), (100, 150), (75, 120), (50, 150),
-                    (20, 120)]
-    for n in range(0, len(poly1_coords), 2):
-        # poly1.append(GetLine(poly1_coords[n], poly1_coords[n + 1]))
-    obstacles.append(poly1)
+    return map_space
 
-    rect = np.zeros(300 * 200, dtype=int)
-    rect_coords = [(39, 126), (34.5, 128.5) (30, 131), (95, 169), (104, 164)]
-    for n in range(0, len(rect_coords), 2):
-        # rect.append(GetLine(rect_coords[n], rect_coords[n + 1]))
-        rect = rect and SolveLine(rect_coords[n], rect_coords[n+1])
-    
-    obstacles = obstacles rect
 
-    oval = np.ones(300 * 200, dtype=int)
-    oval_start = (109, 99)
-    a = 40
-    b = 20
-    for x in range(0, (a * 2) - 1):
-        oval.append((x, abs(b * m.sqrt(1 - (((x - 149)**2) / a**2)) + 99)))
-        oval.append((x, -abs(b * m.sqrt(1 - (((x - 149)**2) / a**2)) + 99)))
-    obstacles.append(oval)
+# Given a predefined map, convert to binary map to determine obstacle space (point robot radius = 0, obstacle clearance = 0)
+def CreateMap():
+    # # Create map dictionary which holds coordinates as a tuple of ints and the pixel value of that coordinate location as an int
+    # map_keys = []
+    # for i in range(0, 200):
+    #     for j in range(0, 300):
+    #         map_keys.append((i, j))
 
-    circle = []
-    circle_start = (149, 99)
-    r = 25
-    for x in range(0, 25 * 2):
-        circle.append(x, 50 + abs(m.sqrt(r**2 - (x - 224)**2)))
-        circle.append(x, 50 + -abs(m.sqrt(r**2 - (x - 224)**2)))
-    obstacles.append(circle)
+    # map_values = list(np.ones(300 * 200, dtype=int))
+    # map_space = dict(zip(map_keys, map_values))
 
-    poly2 = []
-    poly2_coords = [(199, 174), (224, 159), (249, 174), (224, 189)]
-    for n in range(0, len(poly2_coords), 2):
-        # poly2.append(GetLine(poly2_coords[n], poly2_coords[n + 1]))
-    obstacles.append(poly2)
+    # # Need to fill in the shapes with black pixels
+    # # need to use half plane primitives and semi-algebrraic methods to define obstacles
+    # obstacles = []
+    # poly1 = np.zeros(300 * 200, dtype=int)
+    # poly1_coords = [(25, 185), (75, 185), (100, 150), (75, 120), (50, 150),
+    #                 (20, 120)]
+    # for n in range(0, len(poly1_coords), 2):
+    #     # poly1.append(GetLine(poly1_coords[n], poly1_coords[n + 1]))
+    # obstacles.append(poly1)
 
-    for point in obstacles:
-        map_space[point] = 0
-    # map_screen = pyg.Surface((300, 200))
-    # map_screen.fill((255, 255, 255))
-    # pyg.draw.circle(map_screen, (0, 0, 0), (224, 50), 25)
+    # rect = np.zeros(300 * 200, dtype=int)
+    # rect_coords = [(39, 126), (34.5, 128.5) (30, 131), (95, 169), (104, 164)]
+    # for n in range(0, len(rect_coords), 2):
+    #     # rect.append(GetLine(rect_coords[n], rect_coords[n + 1]))
+    #     rect = rect and SolveLine(rect_coords[n], rect_coords[n+1])
 
-    # pyg.draw.polygon(map_screen, (0, 0, 0), [(30, 131), (39, 126), (104, 164),
-    #                                          (95, 169)])
-    # pyg.draw.polygon(map_screen, (0, 0, 0), [(25, 14), (75, 14), (100, 49),
-    #                                          (75, 79), (50, 49), (20, 79)])
-    # pyg.draw.ellipse(map_screen, (0, 0, 0), [109, 79, 80, 40])
-    # pyg.draw.polygon(map_screen, (0, 0, 0), [(199, 174), (224, 159),
-    #                                          (249, 174), (224, 189)])
-    # map_array = pyg.surfarray.pixels3d(map_screen)
-    # map_space = {}
-    # for i in range(0, len(map_array[0])):
-    #     for j in range(0, len(map_array)):
-    #         map_space[(j, i)] = map_array[j, i, 0]
+    # obstacles = obstacles rect
+
+    # oval = np.ones(300 * 200, dtype=int)
+    # oval_start = (109, 99)
+    # a = 40
+    # b = 20
+    # for x in range(0, (a * 2) - 1):
+    #     oval.append((x, abs(b * m.sqrt(1 - (((x - 149)**2) / a**2)) + 99)))
+    #     oval.append((x, -abs(b * m.sqrt(1 - (((x - 149)**2) / a**2)) + 99)))
+    # obstacles.append(oval)
+
+    # circle = []
+    # circle_start = (149, 99)
+    # r = 25
+    # for x in range(0, 25 * 2):
+    #     circle.append(x, 50 + abs(m.sqrt(r**2 - (x - 224)**2)))
+    #     circle.append(x, 50 + -abs(m.sqrt(r**2 - (x - 224)**2)))
+    # obstacles.append(circle)
+
+    # poly2 = []
+    # poly2_coords = [(199, 174), (224, 159), (249, 174), (224, 189)]
+    # for n in range(0, len(poly2_coords), 2):
+    #     # poly2.append(GetLine(poly2_coords[n], poly2_coords[n + 1]))
+    # obstacles.append(poly2)
+
+    # for point in obstacles:
+    #     map_space[point] = 0
+    map_screen = pyg.Surface((300, 200))
+    map_screen.fill((255, 255, 255))
+    pyg.draw.circle(map_screen, (0, 0, 0), (224, 50), 25)
+
+    pyg.draw.polygon(map_screen, (0, 0, 0), [(30, 131), (39, 126), (104, 164),
+                                             (95, 169)])
+    pyg.draw.polygon(map_screen, (0, 0, 0), [(25, 14), (75, 14), (100, 49),
+                                             (75, 79), (50, 49), (20, 79)])
+    pyg.draw.ellipse(map_screen, (0, 0, 0), [109, 79, 80, 40])
+    pyg.draw.polygon(map_screen, (0, 0, 0), [(199, 174), (224, 159),
+                                             (249, 174), (224, 189)])
+    map_array = pyg.surfarray.pixels3d(map_screen)
+    map_space = {}
+    for i in range(0, len(map_array[0])):
+        for j in range(0, len(map_array)):
+            map_space[(j, i)] = map_array[j, i, 0]
 
     return map_space
 
@@ -265,15 +290,15 @@ def main():
     #start_Node = (4,5)
     #goal_Node = (20,20)
     map_space = CreateMap()
-    # start, goal = GetInput(map_space)
+    start, goal = GetInput(map_space)
     #path = applyingDijkstraAlgorithm(start_Node,goal_Node)
-    # path = []
-    # for i in range(199, 100, -1):
-    #     path.append((i, i))
-    # visited = []
-    # for i in range(0, 100):
-    #     visited.append((i, i))
-    # Visualize(path, visited, map_space)
+    path = []
+    for i in range(199, 100, -1):
+        path.append((i, i))
+    visited = []
+    for i in range(0, 100):
+        visited.append((i, i))
+    Visualize(path, visited, map_space)
 
 
 main()
