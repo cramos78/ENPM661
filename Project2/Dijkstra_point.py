@@ -8,18 +8,10 @@ import re
 import copy
 
 #need to figure out how to set up equation
-def SolveLine(point1, point2, point3):
-    lhs = np.array([[point1[0], point1[1], 1], [point2[0], point2[1], 1],
-                    [point3[0], point3[1], 1]])
-    rhs = np.array([[0], [0], [0]])
-    solution = np.linalg.lstsq(lhs, rhs)
-    a = solution[0]
-    b = solution[1]
-    c = solution[2]
-    print(a)
-    print(b)
-    print(c) 
-    return a, b, c
+def SolveLine(point1, point2):
+    m = (point2[1]-point1[1])/(point2[0]-point1[0])
+    b = point1[1]-m*point1[0]
+    return m, b
 
 
 # Given a predefined map, convert to binary map to determine obstacle space (point robot radius = 0, obstacle clearance = 0)
@@ -43,21 +35,23 @@ def CreateMap():
     #     # poly1.append(GetLine(poly1_coords[n], poly1_coords[n + 1]))
     # obstacles.append(poly1)
 
-    rect = copy.deepcopy(map_space)
-    rect_coords = [(38, 126), (33.5, 128.5), (29, 131), (29, 131), (61.5, 150),
-                   (94, 169), (94, 169), (98.5, 166.5), (103, 164), (103, 164),
-                   (70.5, 145), (38, 126)]
-    for n in range(0, len(rect_coords), 3):
+    
+    lines = []
+    rect_coords = [(38, 126), (29, 131),(29, 131), (94, 169), (94, 169), (103, 164), (103, 164), (38, 126)]
+    for n in range(0, len(rect_coords), 2):
         # rect.append(GetLine(rect_coords[n], rect_coords[n + 1]))
-        a, b, c = SolveLine(rect_coords[n], rect_coords[n + 1],
-                            rect_coords[n + 2])
-        for key in rect.keys():
-            f = a * key[0] + b * key[1] + c
-            for point in f:
-                print(point)
-                if point <= 0:
-                    rect[key] = 0
-            map_space[key] = map_space[key] and rect[key]
+        m, b= SolveLine(rect_coords[n], rect_coords[n + 1])
+        line = []
+        for x in range(0, 300):
+            y = m * x + b
+            line.append(y)
+        lines.append([line])   
+    for key in map_space.keys():
+        if (key[1] > lines[0][0][key[0]]):
+            if (key[1] < lines[1][0][key[0]]):
+                if (key[1] < lines[2][0][key[0]]):
+                    if (key[1] > lines[3][0][key[0]]):
+                        map_space[key] = 0
 
     #obstacles = obstacles rect
 
@@ -111,27 +105,21 @@ def CreateMap():
 # space or outside range of binary map, inform user to redefine points try again
 def GetInput(map_space):
     input_bad = True
+    start_string = []
+    goal_string = []
     while (input_bad):
-        start_string = []
-        goal_string = []
-        while ((start_string == []) or (goal_string == []) or (len(start_string) > 1) or (len(goal_string) > 1)):
-            start_input = input(
-                "Enter the starting point of the robot within the boundaries of the map (300 by 200) in the form, x, y: "
-            )
-            goal_input = input(
-                "Enter the goal point of the robot within the boundaries of the map (300 by 200) in the form, x, y: "
-            )
-            start_string = re.findall(r"[0-2]?[0-9]?[0-9], [0-1]?[0-9]?[0-9]",
-                                      start_input)
-            goal_string = re.findall(r"[0-2]?[0-9]?[0-9], [0-1]?[0-9]?[0-9]",
-                                     goal_input)
+        while ((start_string == []) or (len(goal_string) > 1) or (goal_string == []) or (len(start_string) > 1)):
+            start_input = input("Enter the starting point of the robot within the boundaries of the map (300 by 200) in the form, x, y: ")
+            goal_input = input("Enter the goal point of the robot within the boundaries of the map (300 by 200) in the form, x, y: ")
+            start_string = re.findall(r"[0-2]?[0-9]?[0-9], [0-1]?[0-9]?[0-9]", start_input)
+            goal_string = re.findall(r"[0-2]?[0-9]?[0-9], [0-1]?[0-9]?[0-9]", goal_input)
 
         start = tuple(map(int, start_string[0].split(', ')))
         goal = tuple(map(int, goal_string[0].split(', ')))
         if ((0 < start[0] < 300) and (0 < goal[0] < 300)):
             if ((0 < start[1] < 200) and (0 < goal[1] < 200)):
-                if (map_space[start] == 255):
-                    if (map_space[goal] == 255):
+                if (map_space[start] == 1):
+                    if (map_space[goal] == 1):
                         input_bad = False
     return start, goal
 
