@@ -2,7 +2,7 @@ import pygame as pyg
 import sys
 import numpy as np
 from pygame.locals import *
-import math as m
+import math
 import heapq as hpq
 import re
 import copy
@@ -15,7 +15,7 @@ def SolveLine(point1, point2):
 
 
 # Given a predefined map, convert to binary map to determine obstacle space (point robot radius = 0, obstacle clearance = 0)
-def CreateMap():
+def CreateMap(clearance):
     # Create map dictionary which holds coordinates as a tuple of ints and the pixel value of that coordinate location as an int
     map_keys = []
     for i in range(0, 200):
@@ -29,17 +29,23 @@ def CreateMap():
     # need to use half plane primitives and semi-algebrraic methods to define obstacles
     # obstacles = []
     # poly1 = np.zeros(300 * 200, dtype=int)
-    # poly1_coords = [(25, 185), (75, 185), (100, 150), (75, 120), (50, 150),
-    #                 (20, 120)]
+    # poly1_coords = [(25, 15), (75, 15), (100, 50), (75, 80), (50, 50),
+    #                 (20, 80)]
     # for n in range(0, len(poly1_coords), 2):
     #     # poly1.append(GetLine(poly1_coords[n], poly1_coords[n + 1]))
     # obstacles.append(poly1)
 
     
     lines = []
-    rect_coords = [(38, 126), (29, 131),(29, 131), (94, 169), (94, 169), (103, 164), (103, 164), (38, 126)]
+    rect_coords = [(38+clearance*math.cos(math.pi/6), 126-clearance*math.sin(math.pi/6)),
+                    (29-clearance*math.cos(math.pi/6), 131+clearance*math.sin(math.pi/6)),
+                    (29-clearance*math.cos(math.pi/6), 131+clearance*math.sin(math.pi/6)),
+                    (94-clearance*math.cos(math.pi/6), 169+clearance*math.sin(math.pi/6)),
+                    (94-clearance*math.cos(math.pi/6), 169+clearance*math.sin(math.pi/6)),
+                    (103+clearance*math.cos(math.pi/6), 164-clearance*math.sin(math.pi/6)),
+                    (103+clearance*math.cos(math.pi/6), 164-clearance*math.sin(math.pi/6)),
+                    (38+clearance*math.cos(math.pi/6), 126-clearance*math.cos(math.pi/6))]
     for n in range(0, len(rect_coords), 2):
-        # rect.append(GetLine(rect_coords[n], rect_coords[n + 1]))
         m, b= SolveLine(rect_coords[n], rect_coords[n + 1])
         line = []
         for x in range(0, 300):
@@ -99,28 +105,41 @@ def CreateMap():
 
     return map_space
 
+def GetClearanceRadius():
+    rc_bad = True
+    radius_list = []
+    clearance_list = []
+    while ((radius_list == []) or (clearance_list == []) or (len(radius_list) > 1) or (len(clearance_list) > 1)):
+        radius_input = input("Enter the radius of the robot as an integer: ")
+        clearance_input = input("Enter the clearance of the robot as an integer: ")
+        radius_list = re.findall(r"[0-9]?[0-9]", radius_input)
+        clearance_list = re.findall(r"[0-9]?[0-9]", clearance_input)
+    radius = int(radius_list[0])
+    clearance = int(clearance_list[0])
+    return clearance, radius
 
 # Obtaining Input from user : Start Point and Goal Point
 # Check feasibility of  User Input : For start or goal nodes in obstacle
 # space or outside range of binary map, inform user to redefine points try again
-def GetInput(map_space):
-    input_bad = True
-    start_string = []
-    goal_string = []
-    while (input_bad):
-        while ((start_string == []) or (len(goal_string) > 1) or (goal_string == []) or (len(start_string) > 1)):
+def GetStartGoal(map_space):
+    start_goal_bad = True
+
+    while (start_goal_bad):
+        start_list = []
+        goal_list = []
+        while ((start_list == []) or (goal_list == []) or (len(start_list) > 1) or (len(goal_list) > 1)):
             start_input = input("Enter the starting point of the robot within the boundaries of the map (300 by 200) in the form, x, y: ")
             goal_input = input("Enter the goal point of the robot within the boundaries of the map (300 by 200) in the form, x, y: ")
-            start_string = re.findall(r"[0-2]?[0-9]?[0-9], [0-1]?[0-9]?[0-9]", start_input)
-            goal_string = re.findall(r"[0-2]?[0-9]?[0-9], [0-1]?[0-9]?[0-9]", goal_input)
+            start_list = re.findall(r"[0-2]?[0-9]?[0-9], [0-1]?[0-9]?[0-9]", start_input)
+            goal_list = re.findall(r"[0-2]?[0-9]?[0-9], [0-1]?[0-9]?[0-9]", goal_input)
 
-        start = tuple(map(int, start_string[0].split(', ')))
-        goal = tuple(map(int, goal_string[0].split(', ')))
+        start = tuple(map(int, start_list[0].split(', ')))
+        goal = tuple(map(int, goal_list[0].split(', ')))
         if ((0 < start[0] < 300) and (0 < goal[0] < 300)):
             if ((0 < start[1] < 200) and (0 < goal[1] < 200)):
                 if (map_space[start] == 1):
                     if (map_space[goal] == 1):
-                        input_bad = False
+                        start_goal_bad = False
     return start, goal
 
 
@@ -267,8 +286,9 @@ def main():
     ListOfNeighborsMovesCost = [1, 1, 1, 1, 1.4, 1.4, 1.4, 1.4]
     #start_Node = (4,5)
     #goal_Node = (20,20)
-    map_space = CreateMap()
-    start, goal = GetInput(map_space)
+    clearance, radius = GetClearanceRadius()
+    map_space = CreateMap(clearance)
+    start, goal = GetStartGoal(map_space)
     #path = applyingDijkstraAlgorithm(start_Node,goal_Node)
     path = []
     for i in range(199, 100, -1):
