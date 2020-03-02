@@ -13,29 +13,7 @@ def SolveLine(point1, point2):
     b = point1[1]-m*point1[0]
     return m, b
 
-
-# Given a predefined map, convert to binary map to determine obstacle space (point robot radius = 0, obstacle clearance = 0)
-def CreateMap(clearance):
-    # Create map dictionary which holds coordinates as a tuple of ints and the pixel value of that coordinate location as an int
-    map_keys = []
-    for i in range(0, 200):
-        for j in range(0, 300):
-            map_keys.append((i, j))
-
-    map_values = list(np.ones(300 * 200, dtype=int))
-    map_space = dict(zip(map_keys, map_values))
-
-    # Need to fill in the shapes with black pixels
-    # need to use half plane primitives and semi-algebrraic methods to define obstacles
-    # obstacles = []
-    # poly1 = np.zeros(300 * 200, dtype=int)
-    # poly1_coords = [(25, 15), (75, 15), (100, 50), (75, 80), (50, 50),
-    #                 (20, 80)]
-    # for n in range(0, len(poly1_coords), 2):
-    #     # poly1.append(GetLine(poly1_coords[n], poly1_coords[n + 1]))
-    # obstacles.append(poly1)
-
-    
+def CreateRect(map_space, clearance):   
     lines = []
     rect_coords = [(38+clearance*math.cos(math.pi/6), 126-clearance*math.sin(math.pi/6)),
                     (29-clearance*math.cos(math.pi/6), 131+clearance*math.sin(math.pi/6)),
@@ -58,7 +36,56 @@ def CreateMap(clearance):
                 if (key[1] < lines[2][0][key[0]]):
                     if (key[1] > lines[3][0][key[0]]):
                         map_space[key] = 0
+    return map_space
 
+def CreateRombus(map_space, clearance):   
+    lines = []
+    romb_coords = [(38+clearance*math.cos(math.pi/6), 126-clearance*math.sin(math.pi/6)),
+                    (29-clearance*math.cos(math.pi/6), 131+clearance*math.sin(math.pi/6)),
+                    (29-clearance*math.cos(math.pi/6), 131+clearance*math.sin(math.pi/6)),
+                    (94-clearance*math.cos(math.pi/6), 169+clearance*math.sin(math.pi/6)),
+                    (94-clearance*math.cos(math.pi/6), 169+clearance*math.sin(math.pi/6)),
+                    (103+clearance*math.cos(math.pi/6), 164-clearance*math.sin(math.pi/6)),
+                    (103+clearance*math.cos(math.pi/6), 164-clearance*math.sin(math.pi/6)),
+                    (38+clearance*math.cos(math.pi/6), 126-clearance*math.cos(math.pi/6))]
+    for n in range(0, len(romb_coords), 2):
+        m, b= SolveLine(romb_coords[n], romb_coords[n + 1])
+        line = []
+        for x in range(0, 300):
+            y = m * x + b
+            line.append(y)
+        lines.append([line])   
+    for key in map_space.keys():
+        if (key[1] > lines[0][0][key[0]]):
+            if (key[1] < lines[1][0][key[0]]):
+                if (key[1] < lines[2][0][key[0]]):
+                    if (key[1] > lines[3][0][key[0]]):
+                        map_space[key] = 0
+    return map_space
+
+# Given a predefined map, convert to binary map to determine obstacle space (point robot radius = 0, obstacle clearance = 0)
+def CreateMap(clearance):
+    # Create map dictionary which holds coordinates as a tuple of ints and the pixel value of that coordinate location as an int
+    map_keys = []
+    for i in range(0, 200):
+        for j in range(0, 300):
+            map_keys.append((i, j))
+
+    map_values = list(np.ones(300 * 200, dtype=int))
+    map_space = dict(zip(map_keys, map_values))
+    # Create all obstacles in map
+    map_space = CreateRect(map_space, clearance)
+    #map_space = CreateRombus(map_space, clearance)
+
+    # Need to fill in the shapes with black pixels
+    # need to use half plane primitives and semi-algebrraic methods to define obstacles
+    # obstacles = []
+    # poly1 = np.zeros(300 * 200, dtype=int)
+    # poly1_coords = [(25, 15), (75, 15), (100, 50), (75, 80), (50, 50),
+    #                 (20, 80)]
+    # for n in range(0, len(poly1_coords), 2):
+    #     # poly1.append(GetLine(poly1_coords[n], poly1_coords[n + 1]))
+    # obstacles.append(poly1)
     #obstacles = obstacles rect
 
     # oval = np.ones(300 * 200, dtype=int)
@@ -167,6 +194,10 @@ def getNode(currentNode):
 
 
 def getCost(current_node_cost, new_node_move):
+    #Implementing a data structure (priority queue) to store Nodes
+    ListOfNeighborsMoves = [(0, 1), (1, 0), (0, -1), (-1, 0), (-1, 1), (1, 1),
+                            (1, -1), (-1, -1)]
+    ListOfNeighborsMovesCost = [1, 1, 1, 1, 1.4, 1.4, 1.4, 1.4]
     index = ListOfNeighborsMoves.index(new_node_move)
     new_node_cost = current_node_cost + ListOfNeighborsMovesCost[index]
     return new_node_cost
@@ -202,6 +233,10 @@ def priorityQueueTest():
 
 # Implementing Djikstra's Algorithm
 def applyingDijkstraAlgorithm(start_node, goal_node):
+    #Implementing a data structure (priority queue) to store Nodes
+    ListOfNeighborsMoves = [(0, 1), (1, 0), (0, -1), (-1, 0), (-1, 1), (1, 1),
+                            (1, -1), (-1, -1)]
+    ListOfNeighborsMovesCost = [1, 1, 1, 1, 1.4, 1.4, 1.4, 1.4]
     exploredNodesPath = {}  # Contains list of explored nodes
     exploredNodesCost = {}  # Contains list of explored nodes cost
     exploredNodesPath[start_node] = 0
@@ -280,22 +315,19 @@ def Visualize(path, visited, map_space):
 
 #main function which calls all subfunctions necessary to solve the maze with Dijkstra's algorithm
 def main():
-    #Implementing a data structure (priority queue) to store Nodes
-    ListOfNeighborsMoves = [(0, 1), (1, 0), (0, -1), (-1, 0), (-1, 1), (1, 1),
-                            (1, -1), (-1, -1)]
-    ListOfNeighborsMovesCost = [1, 1, 1, 1, 1.4, 1.4, 1.4, 1.4]
     #start_Node = (4,5)
     #goal_Node = (20,20)
     clearance, radius = GetClearanceRadius()
     map_space = CreateMap(clearance)
     start, goal = GetStartGoal(map_space)
-    #path = applyingDijkstraAlgorithm(start_Node,goal_Node)
-    path = []
-    for i in range(199, 100, -1):
-        path.append((i, i))
-    visited = []
-    for i in range(0, 100):
-        visited.append((i, i))
+    visited = applyingDijkstraAlgorithm(start,goal)
+    path = backtrackingStartGoalPath(start, goal, visited)
+    #path = []
+    # for i in range(199, 100, -1):
+    #     path.append((i, i))
+    # visited = []
+    # for i in range(0, 100):
+    #     visited.append((i, i))
     Visualize(path, visited, map_space)
 
 
