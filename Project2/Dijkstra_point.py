@@ -5,31 +5,36 @@ from pygame.locals import *
 import math as m
 import heapq as hpq
 import re
+import copy
 
-
+#need to figure out how to set up equation
 def SolveLine(point1, point2, point3):
-    lhs = np.array([point1[0], point1[1], 1], [point2[0], point2[1], 1],
-                   [point3[0], point3[1], 1])
-    rhs = np.array([0], [0], [0])
-    solution = np.linalg.solve(lhs, rhs)
+    lhs = np.array([[point1[0], point1[1], 1], [point2[0], point2[1], 1],
+                    [point3[0], point3[1], 1]])
+    rhs = np.array([[0], [0], [0]])
+    solution = np.linalg.lstsq(lhs, rhs)
     a = solution[0]
     b = solution[1]
     c = solution[2]
+    print(a)
+    print(b)
+    print(c) 
+    return a, b, c
 
 
 # Given a predefined map, convert to binary map to determine obstacle space (point robot radius = 0, obstacle clearance = 0)
 def CreateMap():
-    # # Create map dictionary which holds coordinates as a tuple of ints and the pixel value of that coordinate location as an int
-    # map_keys = []
-    # for i in range(0, 200):
-    #     for j in range(0, 300):
-    #         map_keys.append((i, j))
+    # Create map dictionary which holds coordinates as a tuple of ints and the pixel value of that coordinate location as an int
+    map_keys = []
+    for i in range(0, 200):
+        for j in range(0, 300):
+            map_keys.append((i, j))
 
-    # map_values = list(np.ones(300 * 200, dtype=int))
-    # map_space = dict(zip(map_keys, map_values))
+    map_values = list(np.ones(300 * 200, dtype=int))
+    map_space = dict(zip(map_keys, map_values))
 
-    # # Need to fill in the shapes with black pixels
-    # # need to use half plane primitives and semi-algebrraic methods to define obstacles
+    # Need to fill in the shapes with black pixels
+    # need to use half plane primitives and semi-algebrraic methods to define obstacles
     # obstacles = []
     # poly1 = np.zeros(300 * 200, dtype=int)
     # poly1_coords = [(25, 185), (75, 185), (100, 150), (75, 120), (50, 150),
@@ -38,13 +43,23 @@ def CreateMap():
     #     # poly1.append(GetLine(poly1_coords[n], poly1_coords[n + 1]))
     # obstacles.append(poly1)
 
-    # rect = np.zeros(300 * 200, dtype=int)
-    # rect_coords = [(39, 126), (34.5, 128.5) (30, 131), (95, 169), (104, 164)]
-    # for n in range(0, len(rect_coords), 2):
-    #     # rect.append(GetLine(rect_coords[n], rect_coords[n + 1]))
-    #     rect = rect and SolveLine(rect_coords[n], rect_coords[n+1])
+    rect = copy.deepcopy(map_space)
+    rect_coords = [(38, 126), (33.5, 128.5), (29, 131), (29, 131), (61.5, 150),
+                   (94, 169), (94, 169), (98.5, 166.5), (103, 164), (103, 164),
+                   (70.5, 145), (38, 126)]
+    for n in range(0, len(rect_coords), 3):
+        # rect.append(GetLine(rect_coords[n], rect_coords[n + 1]))
+        a, b, c = SolveLine(rect_coords[n], rect_coords[n + 1],
+                            rect_coords[n + 2])
+        for key in rect.keys():
+            f = a * key[0] + b * key[1] + c
+            for point in f:
+                print(point)
+                if point <= 0:
+                    rect[key] = 0
+            map_space[key] = map_space[key] and rect[key]
 
-    # obstacles = obstacles rect
+    #obstacles = obstacles rect
 
     # oval = np.ones(300 * 200, dtype=int)
     # oval_start = (109, 99)
@@ -71,22 +86,22 @@ def CreateMap():
 
     # for point in obstacles:
     #     map_space[point] = 0
-    map_screen = pyg.Surface((300, 200))
-    map_screen.fill((255, 255, 255))
-    pyg.draw.circle(map_screen, (0, 0, 0), (224, 50), 25)
+    # map_screen = pyg.Surface((300, 200))
+    # map_screen.fill((255, 255, 255))
+    # pyg.draw.circle(map_screen, (0, 0, 0), (224, 50), 25)
 
-    pyg.draw.polygon(map_screen, (0, 0, 0), [(30, 131), (39, 126), (104, 164),
-                                             (95, 169)])
-    pyg.draw.polygon(map_screen, (0, 0, 0), [(25, 14), (75, 14), (100, 49),
-                                             (75, 79), (50, 49), (20, 79)])
-    pyg.draw.ellipse(map_screen, (0, 0, 0), [109, 79, 80, 40])
-    pyg.draw.polygon(map_screen, (0, 0, 0), [(199, 174), (224, 159),
-                                             (249, 174), (224, 189)])
-    map_array = pyg.surfarray.pixels3d(map_screen)
-    map_space = {}
-    for i in range(0, len(map_array[0])):
-        for j in range(0, len(map_array)):
-            map_space[(j, i)] = map_array[j, i, 0]
+    # pyg.draw.polygon(map_screen, (0, 0, 0), [(30, 131), (39, 126), (104, 164),
+    #                                          (95, 169)])
+    # pyg.draw.polygon(map_screen, (0, 0, 0), [(25, 14), (75, 14), (100, 49),
+    #                                          (75, 79), (50, 49), (20, 79)])
+    # pyg.draw.ellipse(map_screen, (0, 0, 0), [109, 79, 80, 40])
+    # pyg.draw.polygon(map_screen, (0, 0, 0), [(199, 174), (224, 159),
+    #                                          (249, 174), (224, 189)])
+    # map_array = pyg.surfarray.pixels3d(map_screen)
+    # map_space = {}
+    # for i in range(0, len(map_array[0])):
+    #     for j in range(0, len(map_array)):
+    #         map_space[(j, i)] = map_array[j, i, 0]
 
     return map_space
 
@@ -99,8 +114,7 @@ def GetInput(map_space):
     while (input_bad):
         start_string = []
         goal_string = []
-        while ((start_string == []) or (goal_string == [])
-               or (len(start_string) > 1) or (len(goal_string) > 1)):
+        while ((start_string == []) or (goal_string == []) or (len(start_string) > 1) or (len(goal_string) > 1)):
             start_input = input(
                 "Enter the starting point of the robot within the boundaries of the map (300 by 200) in the form, x, y: "
             )
