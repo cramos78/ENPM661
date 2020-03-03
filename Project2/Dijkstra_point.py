@@ -11,7 +11,6 @@ import copy
 def SolveLine(point1, point2):
     m = (point2[1]-point1[1])/(point2[0]-point1[0])
     b = point1[1]-m*point1[0]
-    print(m, b)
     return m, b
 
 def CreateRect(map_space, clearance, radius):
