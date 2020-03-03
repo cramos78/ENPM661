@@ -149,8 +149,8 @@ def CreatePoly3(map_space, clearance, radius):
                     (100, 50),
                     (100+corr_line3_x, 50-corr_line3_y),
                     (75+corr_line3_x, 15-corr_line3_y),
-                    (75, 15+corr_line4_y),
-                    (25, 15+corr_line4_y)]
+                    (75, 15-corr_line4_y),
+                    (25, 15-corr_line4_y)]
     for n in range(0, len(poly1_coords), 2):
         m, b= SolveLine(poly1_coords[n], poly1_coords[n + 1])
         line = []
@@ -184,16 +184,6 @@ def CreateMap(clearance, radius):
     map_space = CreatePoly3(map_space, clearance, radius)
     #map_space = CreateOval(map_space, clearance, radius)
     #map_space = CreateCircle(map_space, clearance, radius)
-
-    
-    # obstacles = []
-    # poly1 = np.zeros(300 * 200, dtype=int)
-    # poly1_coords = [(25, 15), (75, 15), (100, 50), (75, 80), (50, 50),
-    #                 (20, 80)]
-    # for n in range(0, len(poly1_coords), 2):
-    #     # poly1.append(GetLine(poly1_coords[n], poly1_coords[n + 1]))
-    # obstacles.append(poly1)
-    #obstacles = obstacles rect
 
     # oval = np.ones(300 * 200, dtype=int)
     # oval_start = (109, 99)
