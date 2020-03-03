@@ -15,20 +15,22 @@ def SolveLine(point1, point2):
 
 def CreateRect(map_space, clearance, radius):
     lines = []
-    c_x = clearance*math.cos(math.pi/6)
-    c_y = clearance*math.sin(math.pi/6)
-    r_x = radius*math.cos(math.pi/6)
-    r_y = radius*math.sin(math.pi/6)
-    corr_x = c_x + r_x
-    corr_y = c_y + r_y
-    rect_coords = [(38+corr_x, 126-corr_y),
-                    (29-corr_x, 131+corr_y),
-                    (29-corr_x, 131+corr_y),
-                    (94-corr_x, 169+corr_y),
-                    (94-corr_x, 169+corr_y),
-                    (103+corr_x, 164-corr_y),
-                    (103+corr_x, 164-corr_y),
-                    (38+corr_x, 126-corr_y)]
+    corr_line1_x = (clearance + radius)*math.cos(30*math.pi/180)
+    corr_line1_y = (clearance + radius)*math.sin(30*math.pi/180)
+    corr_line2_x = (clearance + radius)*math.sin(30*math.pi/180)
+    corr_line2_y = (clearance + radius)*math.cos(30*math.pi/180)
+    corr_line3_x = (clearance + radius)*math.cos(30*math.pi/180)
+    corr_line3_y = (clearance + radius)*math.sin(30*math.pi/180)
+    corr_line4_x = (clearance + radius)*math.sin(30*math.pi/180)
+    corr_line4_y = (clearance + radius)*math.cos(59*math.pi/180)
+    rect_coords = [(38-corr_line1_x, 126-corr_line1_y),
+                   (29-corr_line1_x, 131-corr_line1_y),
+                   (29-corr_line2_x, 131+corr_line2_y),
+                   (94-corr_line2_x, 169+corr_line2_y),
+                   (94+corr_line3_x, 169+corr_line3_y),
+                   (103+corr_line3_x, 164+corr_line3_y),
+                   (103+corr_line4_x, 164-corr_line4_y),
+                   (38+corr_line4_x, 126-corr_line4_y)]
     for n in range(0, len(rect_coords), 2):
         m, b= SolveLine(rect_coords[n], rect_coords[n + 1])
         line = []
@@ -37,25 +39,26 @@ def CreateRect(map_space, clearance, radius):
             line.append(y)
         lines.append([line])   
     for key in map_space.keys():
-        if (key[1] > lines[0][0][key[0]]):
-            if (key[1] < lines[1][0][key[0]]):
-                if (key[1] < lines[2][0][key[0]]):
-                    if (key[1] > lines[3][0][key[0]]):
+        if (key[1] >= lines[0][0][key[0]]):
+            if (key[1] <= lines[1][0][key[0]]):
+                if (key[1] <= lines[2][0][key[0]]):
+                    if (key[1] >= lines[3][0][key[0]]):
                         map_space[key] = 0
     return map_space
 
 def CreateRhombus(map_space, clearance, radius):   
     lines = []
-    corr = clearance + radius
-    #poly2_coords = [(199, 174), (224, 159), (249, 174), (224, 189)]
-    rhomb_coords = [(224, 159+corr),
-                    (199-corr, 174),
-                    (199-corr, 174),
-                    (224, 189-corr),
-                    (224, 189-corr),
-                    (249+corr, 174),
-                    (249+corr, 174),
-                    (224, 159+corr)]
+    corr_x = (clearance + radius)*math.sin(59*math.pi/180)
+    corr_y = (clearance + radius)*math.cos(59*math.pi/180)
+    #rhomb_coords = [(199, 174), (224, 159), (249, 174), (224, 189)]
+    rhomb_coords = [(224-corr_x, 159-corr_y),
+                    (199-corr_x, 174-corr_y),
+                    (199-corr_x, 174+corr_y),
+                    (224-corr_x, 189+corr_y),
+                    (224+corr_x, 189+corr_y),
+                    (249+corr_x, 174+corr_y),
+                    (249+corr_x, 174-corr_y),
+                    (224+corr_x, 159-corr_y)]
     for n in range(0, len(rhomb_coords), 2):
         m, b= SolveLine(rhomb_coords[n], rhomb_coords[n + 1])
         line = []
@@ -63,24 +66,28 @@ def CreateRhombus(map_space, clearance, radius):
             y = m * x + b
             line.append(y)
         lines.append([line])   
-    for key in map_space.keys():
-        
-        if key[1] > lines[0][0][key[0]]:
-            if key[1] < lines[1][0][key[0]]:
-                if key[1] < lines[2][0][key[0]]:
-                    if key[1] > lines[3][0][key[0]]:
+    for key in map_space.keys():   
+        if key[1] >= lines[0][0][key[0]]:
+            if key[1] <= lines[1][0][key[0]]:
+                if key[1] <= lines[2][0][key[0]]:
+                    if key[1] >= lines[3][0][key[0]]:
                         map_space[key] = 0
     return map_space
 
 def CreatePoly1(map_space, clearance, radius):   
     lines = []
-    #poly1_coords = [(25, 15), (75, 15), (20, 80)]
-    poly1_coords = [(25, 15),
-                    (75, 15),
-                    (75, 15),
-                    (20, 80),
-                    (20, 80),
-                    (25, 15)]
+    #poly1_coords = [(22.5, 50), (50, 50), (20, 80)]
+    corr_line1_x = (clearance+radius)*math.cos(4.397*math.pi/180)
+    corr_line1_y = (clearance+radius)*math.sin(4.397*math.pi/180)
+    corr_line2_x = (clearance+radius)*math.sin(49.764*math.pi/180)
+    corr_line2_y = (clearance+radius)*math.cos(49.764*math.pi/180)
+    
+    poly1_coords = [(22.5-corr_line1_x, 50-corr_line1_y),
+                    (20-corr_line1_x, 80-corr_line1_y),
+                    (20+corr_line2_x, 80+corr_line2_y),
+                    (50+corr_line2_x, 50+corr_line2_y),
+                    (50, 50),
+                    (22.5, 50)]
     for n in range(0, len(poly1_coords), 2):
         m, b= SolveLine(poly1_coords[n], poly1_coords[n + 1])
         line = []
@@ -90,9 +97,73 @@ def CreatePoly1(map_space, clearance, radius):
         lines.append([line])   
     for key in map_space.keys():
         
-        if key[1] > lines[0][0][key[0]]:
-            if key[1] < lines[1][0][key[0]]:
-                if key[1] > lines[2][0][key[0]]:
+        if key[1] >= lines[0][0][key[0]]:
+            if key[1] <= lines[1][0][key[0]]:
+                if key[1] >= lines[2][0][key[0]]:
+                        map_space[key] = 0
+    return map_space
+
+def CreatePoly2(map_space, clearance, radius):   
+    lines = []
+    #poly2_coords = (50, 50), (75, 80), (100, 50)
+    corr_line1_x = (clearance+radius)*math.sin(50.19*math.pi/180)
+    corr_line1_y = (clearance+radius)*math.cos(50.19*math.pi/180)
+    corr2_x = (clearance+radius)*math.cos(50.19*math.pi/180)
+    corr2_y = (clearance+radius)*math.sin(50.19*math.pi/180)
+    corr3_x = (clearance+radius)*math.sin(50.19*math.pi/180)
+    corr3_y = (clearance+radius)*math.cos(50.19*math.pi/180)
+    
+    poly1_coords = [(50-corr_line1_x, 50+corr_line1_y),
+                    (75-corr_line1_x, 80+corr_line1_y),
+                    (75+corr2_x, 80+corr2_y),
+                    (100+corr3_x, 50+corr3_y),
+                    (100, 50),
+                    (50, 50)]
+    for n in range(0, len(poly1_coords), 2):
+        m, b= SolveLine(poly1_coords[n], poly1_coords[n + 1])
+        line = []
+        for x in range(0, 300):
+            y = m * x + b
+            line.append(y)
+        lines.append([line])   
+    for key in map_space.keys():
+        
+        if key[1] <= lines[0][0][key[0]]:
+            if key[1] <= lines[1][0][key[0]]:
+                if key[1] >= lines[2][0][key[0]]:
+                        map_space[key] = 0
+    return map_space
+
+def CreatePoly3(map_space, clearance, radius):   
+    lines = []
+    #poly3_coords = [(25, 15), (22.5, 50), (100, 50), (75, 15)]
+    corr_line1_x = (clearance+radius)*math.cos(4.397*math.pi/180)
+    corr_line1_y = (clearance+radius)*math.sin(4.397*math.pi/180)
+    corr_line3_x = (clearance+radius)*math.cos(35.5376*math.pi/180)
+    corr_line3_y = (clearance+radius)*math.sin(35.5376*math.pi/180)
+    corr_line4_y = clearance+radius
+    
+    poly1_coords = [(25-corr_line1_x, 15-corr_line1_y),
+                    (22.5-corr_line1_x, 50-corr_line1_y),
+                    (22.5, 50),
+                    (100, 50),
+                    (100+corr_line3_x, 50-corr_line3_y),
+                    (75+corr_line3_x, 15-corr_line3_y),
+                    (75, 15+corr_line4_y),
+                    (25, 15+corr_line4_y)]
+    for n in range(0, len(poly1_coords), 2):
+        m, b= SolveLine(poly1_coords[n], poly1_coords[n + 1])
+        line = []
+        for x in range(0, 300):
+            y = m * x + b
+            line.append(y)
+        lines.append([line])   
+    for key in map_space.keys():
+        
+        if key[1] >= lines[0][0][key[0]]:
+            if key[1] <= lines[1][0][key[0]]:
+                if key[1] >= lines[2][0][key[0]]:
+                    if key[1] >= lines[3][0][key[0]]: 
                         map_space[key] = 0
     return map_space
 
@@ -109,8 +180,8 @@ def CreateMap(clearance, radius):
     map_space = CreateRect(map_space, clearance, radius)
     map_space = CreateRhombus(map_space, clearance, radius)
     map_space = CreatePoly1(map_space, clearance, radius)
-    #(75, 15), (100, 50), (75, 80), (50, 50)
-    #map_space = CreatePoly2(map_space, clearance, radius)
+    map_space = CreatePoly2(map_space, clearance, radius)
+    map_space = CreatePoly3(map_space, clearance, radius)
     #map_space = CreateOval(map_space, clearance, radius)
     #map_space = CreateCircle(map_space, clearance, radius)
 
@@ -183,9 +254,11 @@ def GetStartGoal(map_space):
             if ((0 < start[1] < 200) and (0 < goal[1] < 200)):
                 if (map_space[start] == 1):
                     if (map_space[goal] == 1):
+                        if (map_space[goal] == 0):
+                            print("goal position either outside of map boundary or is occupied by obstacle...")
+                        if (map_space[start] == 0):
+                            print("start position either outside of map boundary or is occupied by obstacle...")
                         start_goal_bad = False
-                    if (map_space[goal] == 0):
-                        print("goal position either outside of map boundary or is occupied by obstacle...")
     return start, goal
 
 
