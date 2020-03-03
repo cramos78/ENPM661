@@ -11,18 +11,25 @@ import copy
 def SolveLine(point1, point2):
     m = (point2[1]-point1[1])/(point2[0]-point1[0])
     b = point1[1]-m*point1[0]
+    print(m, b)
     return m, b
 
-def CreateRect(map_space, clearance):   
+def CreateRect(map_space, clearance, radius):
     lines = []
-    rect_coords = [(38+clearance*math.cos(math.pi/6), 126-clearance*math.sin(math.pi/6)),
-                    (29-clearance*math.cos(math.pi/6), 131+clearance*math.sin(math.pi/6)),
-                    (29-clearance*math.cos(math.pi/6), 131+clearance*math.sin(math.pi/6)),
-                    (94-clearance*math.cos(math.pi/6), 169+clearance*math.sin(math.pi/6)),
-                    (94-clearance*math.cos(math.pi/6), 169+clearance*math.sin(math.pi/6)),
-                    (103+clearance*math.cos(math.pi/6), 164-clearance*math.sin(math.pi/6)),
-                    (103+clearance*math.cos(math.pi/6), 164-clearance*math.sin(math.pi/6)),
-                    (38+clearance*math.cos(math.pi/6), 126-clearance*math.cos(math.pi/6))]
+    c_x = clearance*math.cos(math.pi/6)
+    c_y = clearance*math.sin(math.pi/6)
+    r_x = radius*math.cos(math.pi/6)
+    r_y = radius*math.sin(math.pi/6)
+    corr_x = c_x + r_x
+    corr_y = c_y + r_y
+    rect_coords = [(38+corr_x, 126-corr_y),
+                    (29-corr_x, 131+corr_y),
+                    (29-corr_x, 131+corr_y),
+                    (94-corr_x, 169+corr_y),
+                    (94-corr_x, 169+corr_y),
+                    (103+corr_x, 164-corr_y),
+                    (103+corr_x, 164-corr_y),
+                    (38+corr_x, 126-corr_y)]
     for n in range(0, len(rect_coords), 2):
         m, b= SolveLine(rect_coords[n], rect_coords[n + 1])
         line = []
@@ -38,47 +45,77 @@ def CreateRect(map_space, clearance):
                         map_space[key] = 0
     return map_space
 
-def CreateRombus(map_space, clearance):   
+def CreateRhombus(map_space, clearance, radius):   
     lines = []
-    romb_coords = [(38+clearance*math.cos(math.pi/6), 126-clearance*math.sin(math.pi/6)),
-                    (29-clearance*math.cos(math.pi/6), 131+clearance*math.sin(math.pi/6)),
-                    (29-clearance*math.cos(math.pi/6), 131+clearance*math.sin(math.pi/6)),
-                    (94-clearance*math.cos(math.pi/6), 169+clearance*math.sin(math.pi/6)),
-                    (94-clearance*math.cos(math.pi/6), 169+clearance*math.sin(math.pi/6)),
-                    (103+clearance*math.cos(math.pi/6), 164-clearance*math.sin(math.pi/6)),
-                    (103+clearance*math.cos(math.pi/6), 164-clearance*math.sin(math.pi/6)),
-                    (38+clearance*math.cos(math.pi/6), 126-clearance*math.cos(math.pi/6))]
-    for n in range(0, len(romb_coords), 2):
-        m, b= SolveLine(romb_coords[n], romb_coords[n + 1])
+    corr = clearance + radius
+    #poly2_coords = [(199, 174), (224, 159), (249, 174), (224, 189)]
+    rhomb_coords = [(224, 159+corr),
+                    (199-corr, 174),
+                    (199-corr, 174),
+                    (224, 189-corr),
+                    (224, 189-corr),
+                    (249+corr, 174),
+                    (249+corr, 174),
+                    (224, 159+corr)]
+    for n in range(0, len(rhomb_coords), 2):
+        m, b= SolveLine(rhomb_coords[n], rhomb_coords[n + 1])
         line = []
         for x in range(0, 300):
             y = m * x + b
             line.append(y)
         lines.append([line])   
     for key in map_space.keys():
-        if (key[1] > lines[0][0][key[0]]):
-            if (key[1] < lines[1][0][key[0]]):
-                if (key[1] < lines[2][0][key[0]]):
-                    if (key[1] > lines[3][0][key[0]]):
+        
+        if key[1] > lines[0][0][key[0]]:
+            if key[1] < lines[1][0][key[0]]:
+                if key[1] < lines[2][0][key[0]]:
+                    if key[1] > lines[3][0][key[0]]:
+                        map_space[key] = 0
+    return map_space
+
+def CreatePoly1(map_space, clearance, radius):   
+    lines = []
+    #poly1_coords = [(25, 15), (75, 15), (20, 80)]
+    poly1_coords = [(25, 15),
+                    (75, 15),
+                    (75, 15),
+                    (20, 80),
+                    (20, 80),
+                    (25, 15)]
+    for n in range(0, len(poly1_coords), 2):
+        m, b= SolveLine(poly1_coords[n], poly1_coords[n + 1])
+        line = []
+        for x in range(0, 300):
+            y = m * x + b
+            line.append(y)
+        lines.append([line])   
+    for key in map_space.keys():
+        
+        if key[1] > lines[0][0][key[0]]:
+            if key[1] < lines[1][0][key[0]]:
+                if key[1] > lines[2][0][key[0]]:
                         map_space[key] = 0
     return map_space
 
 # Given a predefined map, convert to binary map to determine obstacle space (point robot radius = 0, obstacle clearance = 0)
-def CreateMap(clearance):
+def CreateMap(clearance, radius):
     # Create map dictionary which holds coordinates as a tuple of ints and the pixel value of that coordinate location as an int
     map_keys = []
-    for i in range(0, 200):
+    for i in range(0, 199):
         for j in range(0, 300):
-            map_keys.append((i, j))
+            map_keys.append((j, i))
 
     map_values = list(np.ones(300 * 200, dtype=int))
     map_space = dict(zip(map_keys, map_values))
-    # Create all obstacles in map
-    map_space = CreateRect(map_space, clearance)
-    #map_space = CreateRombus(map_space, clearance)
+    map_space = CreateRect(map_space, clearance, radius)
+    map_space = CreateRhombus(map_space, clearance, radius)
+    map_space = CreatePoly1(map_space, clearance, radius)
+    #(75, 15), (100, 50), (75, 80), (50, 50)
+    #map_space = CreatePoly2(map_space, clearance, radius)
+    #map_space = CreateOval(map_space, clearance, radius)
+    #map_space = CreateCircle(map_space, clearance, radius)
 
-    # Need to fill in the shapes with black pixels
-    # need to use half plane primitives and semi-algebrraic methods to define obstacles
+    
     # obstacles = []
     # poly1 = np.zeros(300 * 200, dtype=int)
     # poly1_coords = [(25, 15), (75, 15), (100, 50), (75, 80), (50, 50),
@@ -104,31 +141,12 @@ def CreateMap(clearance):
     #     circle.append(x, 50 + abs(m.sqrt(r**2 - (x - 224)**2)))
     #     circle.append(x, 50 + -abs(m.sqrt(r**2 - (x - 224)**2)))
     # obstacles.append(circle)
-
+    #RHOMBUS
     # poly2 = []
     # poly2_coords = [(199, 174), (224, 159), (249, 174), (224, 189)]
     # for n in range(0, len(poly2_coords), 2):
     #     # poly2.append(GetLine(poly2_coords[n], poly2_coords[n + 1]))
     # obstacles.append(poly2)
-
-    # for point in obstacles:
-    #     map_space[point] = 0
-    # map_screen = pyg.Surface((300, 200))
-    # map_screen.fill((255, 255, 255))
-    # pyg.draw.circle(map_screen, (0, 0, 0), (224, 50), 25)
-
-    # pyg.draw.polygon(map_screen, (0, 0, 0), [(30, 131), (39, 126), (104, 164),
-    #                                          (95, 169)])
-    # pyg.draw.polygon(map_screen, (0, 0, 0), [(25, 14), (75, 14), (100, 49),
-    #                                          (75, 79), (50, 49), (20, 79)])
-    # pyg.draw.ellipse(map_screen, (0, 0, 0), [109, 79, 80, 40])
-    # pyg.draw.polygon(map_screen, (0, 0, 0), [(199, 174), (224, 159),
-    #                                          (249, 174), (224, 189)])
-    # map_array = pyg.surfarray.pixels3d(map_screen)
-    # map_space = {}
-    # for i in range(0, len(map_array[0])):
-    #     for j in range(0, len(map_array)):
-    #         map_space[(j, i)] = map_array[j, i, 0]
 
     return map_space
 
@@ -167,6 +185,8 @@ def GetStartGoal(map_space):
                 if (map_space[start] == 1):
                     if (map_space[goal] == 1):
                         start_goal_bad = False
+                    if (map_space[goal] == 0):
+                        print("goal position either outside of map boundary or is occupied by obstacle...")
     return start, goal
 
 
@@ -315,19 +335,11 @@ def Visualize(path, visited, map_space):
 
 #main function which calls all subfunctions necessary to solve the maze with Dijkstra's algorithm
 def main():
-    #start_Node = (4,5)
-    #goal_Node = (20,20)
     clearance, radius = GetClearanceRadius()
-    map_space = CreateMap(clearance)
+    map_space = CreateMap(clearance, radius)
     start, goal = GetStartGoal(map_space)
     visited = applyingDijkstraAlgorithm(start,goal)
     path = backtrackingStartGoalPath(start, goal, visited)
-    #path = []
-    # for i in range(199, 100, -1):
-    #     path.append((i, i))
-    # visited = []
-    # for i in range(0, 100):
-    #     visited.append((i, i))
     Visualize(path, visited, map_space)
 
 
