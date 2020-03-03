@@ -167,6 +167,23 @@ def CreatePoly3(map_space, clearance, radius):
                         map_space[key] = 0
     return map_space
 
+def CreateOval(map_space, clearance, radius):
+    a = 40 + clearance + radius
+    b = 20 + clearance + radius
+    for key in map_space.keys():
+        f = (((key[0]-149)**2)/(a**2))+(((key[1]-99)**2)/(b**2))-1
+        if f <= 0:
+            map_space[key] = 0
+    return map_space
+
+def CreateCircle(map_space, clearance, radius):
+    r = 25 + clearance + radius
+    for key in map_space.keys():
+        f = ((key[0]-224)**2)+((key[1]-49)**2)-(r**2)
+        if f <= 0:
+            map_space[key] = 0
+    return map_space
+
 # Given a predefined map, convert to binary map to determine obstacle space (point robot radius = 0, obstacle clearance = 0)
 def CreateMap(clearance, radius):
     # Create map dictionary which holds coordinates as a tuple of ints and the pixel value of that coordinate location as an int
@@ -182,31 +199,8 @@ def CreateMap(clearance, radius):
     map_space = CreatePoly1(map_space, clearance, radius)
     map_space = CreatePoly2(map_space, clearance, radius)
     map_space = CreatePoly3(map_space, clearance, radius)
-    #map_space = CreateOval(map_space, clearance, radius)
-    #map_space = CreateCircle(map_space, clearance, radius)
-
-    # oval = np.ones(300 * 200, dtype=int)
-    # oval_start = (109, 99)
-    # a = 40
-    # b = 20
-    # for x in range(0, (a * 2) - 1):
-    #     oval.append((x, abs(b * m.sqrt(1 - (((x - 149)**2) / a**2)) + 99)))
-    #     oval.append((x, -abs(b * m.sqrt(1 - (((x - 149)**2) / a**2)) + 99)))
-    # obstacles.append(oval)
-
-    # circle = []
-    # circle_start = (149, 99)
-    # r = 25
-    # for x in range(0, 25 * 2):
-    #     circle.append(x, 50 + abs(m.sqrt(r**2 - (x - 224)**2)))
-    #     circle.append(x, 50 + -abs(m.sqrt(r**2 - (x - 224)**2)))
-    # obstacles.append(circle)
-    #RHOMBUS
-    # poly2 = []
-    # poly2_coords = [(199, 174), (224, 159), (249, 174), (224, 189)]
-    # for n in range(0, len(poly2_coords), 2):
-    #     # poly2.append(GetLine(poly2_coords[n], poly2_coords[n + 1]))
-    # obstacles.append(poly2)
+    map_space = CreateOval(map_space, clearance, radius)
+    map_space = CreateCircle(map_space, clearance, radius)
 
     return map_space
 
